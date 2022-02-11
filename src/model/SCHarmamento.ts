@@ -1,4 +1,6 @@
 import { Schema, model } from 'mongoose';
+import { Accesorio } from '../clases/Accesorio/accesorio';
+import{SAccesorio} from '../model/SCHaccesorio'
 
 const armaSchema = new Schema({
     _codArma: {
@@ -24,18 +26,21 @@ const armaSchema = new Schema({
     },
     _calibre: {
         type: Number
-    }
+    },
+    
 })
 
+
 export type iArma = {
-    _codArma: number | null,
-    _nombreArma: string | null,
-    _fechaProduccion: Date | null,
-    _precioBase: number | null,
-    _disparoAutomatico: boolean | null,
-    _categoriaArma: string | null,
-    _animaRayada: boolean | null,
-    _calibre: number | null
+    _codArma: string, 
+    _nombreArma: string ,
+    _fechaProduccion: Date ,
+    _precioBase: number ,
+    _disparoAutomatico: boolean ,
+    _categoriaArma: string ,
+    _animaRayada: boolean, 
+    _calibre: number ,
+    _accesorio : Accesorio[] 
 }
 
 

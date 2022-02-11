@@ -45,4 +45,6 @@ export class Tirador {
     get fechaInscripcion() {
         return this._fechaInscripcion;
     }
+
+    
 }

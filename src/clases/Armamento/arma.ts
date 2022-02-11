@@ -17,7 +17,7 @@ export class Arma {
         disparoAutomatico: boolean,
         categoriaArma: string,
         animaRayada: boolean,
-        calibre: number
+        calibre: number,
     ) {
 
         this._codArma = codArma;
@@ -31,31 +31,59 @@ export class Arma {
         this._calibre = calibre;
         this._accesorio = new Array<Accesorio>();
     }
-    get codArma() {
+    public get codArma() {
         return this._codArma;
     }
-    get nombreArma() {
+    public get nombreArma() {
         return this._nombreArma;
     }
-    get fechaProduccion() {
+    public get fechaProduccion() {
         return this._fechaProduccion;
     }
-    get precioBase() {
+    public get precioBase() {
         return this._precioBase;
     }
-    get calibre() {
+    public get calibre() {
         return this._calibre;
     }
-    get disparoAutomatico() {
+    public get disparoAutomatico() {
         return this._disparoAutomatico;
     }
-    get categoriaArma() {
+    public get categoriaArma() {
         return this._categoriaArma;
     }
-    get animaRayada() {
+    public get animaRayada() {
         return this._animaRayada;
     }
-    get accesorio(): Array<Accesorio> {
+    public get accesorio(): Array<Accesorio> {
         return this._accesorio
+    }
+
+    public addAccesorio(accesorio: Accesorio) {
+        this._accesorio.push(accesorio);
+    }
+
+    valorF() {
+        let hoy = new Date();
+        
+        let añosA = hoy.getFullYear() - this._fechaProduccion.getFullYear();
+        
+        if (añosA > 2) {
+            this._precioBase = this._precioBase - (this._precioBase * 0.25)
+        } else if (añosA > 5 && añosA < 10) {
+            this._precioBase = this._precioBase - (this._precioBase * 0.35)
+        } else if (añosA > 10) {
+            this._precioBase = this._precioBase - (this._precioBase * 0.40)
+        }
+        if (this._calibre > 0.8) {
+            this._precioBase = this._precioBase + 20
+        }
+        if (this._animaRayada == true){
+            this._precioBase = this._precioBase + 150
+        }
+        if (this._disparoAutomatico == true){
+            this._precioBase = this._precioBase + 150
+        }
+        return this._precioBase
     }
 }

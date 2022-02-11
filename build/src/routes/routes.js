@@ -16,6 +16,8 @@ const SCHarmamento_1 = require("../model/SCHarmamento");
 const SCHequipo_1 = require("../model/SCHequipo");
 const SCHaccesorio_1 = require("../model/SCHaccesorio");
 const SCHtirador_1 = require("../model/SCHtirador");
+const arma_1 = require("../clases/Armamento/arma");
+const accesorio_1 = require("../clases/Accesorio/accesorio");
 class DatoRoutes {
     constructor() {
         // funciones basicas para las armas
@@ -150,6 +152,7 @@ class DatoRoutes {
                     _codArma: tirador._codArma,
                     _codEquipo: tirador._codEquipo,
                     _nombre: tirador._nombre,
+                    _rolTirador: tirador.rolTirador,
                     _bajas: tirador._bajas,
                     _muertes: tirador._muertes,
                     _fechaInscripcion: tirador._fechaInscripcion
@@ -171,11 +174,7 @@ class DatoRoutes {
             yield database_1.db.conectarBD()
                 .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
                 console.log(mensaje);
-                const query = yield SCHtirador_1.STirador.aggregate([
-                    {
-                        $match: { "_codArma": cod }
-                    }
-                ]);
+                const query = yield SCHtirador_1.STirador.find({ _codArma: cod });
                 res.json(query);
             }))
                 .catch((mensaje) => {
@@ -223,6 +222,7 @@ class DatoRoutes {
                         _codArma: modtirador._codArma,
                         _codEquipo: modtirador._codEquipo,
                         _nombre: modtirador._nombre,
+                        _rolTirador: modtirador._rolTirador,
                         _bajas: modtirador._bajas,
                         _muertes: modtirador._muertes,
                         _fechaInscripcion: modtirador._fechaInscripcion,
@@ -337,11 +337,7 @@ class DatoRoutes {
             yield database_1.db.conectarBD()
                 .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
                 console.log(mensaje);
-                const query = yield SCHaccesorio_1.SAccesorio.aggregate([
-                    {
-                        $match: { "_codArma": cod }
-                    }
-                ]);
+                const query = yield SCHaccesorio_1.SAccesorio.find({ _idAccesorio: cod });
                 res.json(query);
             }))
                 .catch((mensaje) => {
@@ -356,6 +352,7 @@ class DatoRoutes {
                 console.log("elijo cargador");
                 objAccesorio = new SCHaccesorio_1.SAccesorio({
                     _codArma: accesorio._codArma,
+                    _idAccesorio: accesorio._idAccesorio,
                     _nombre: accesorio._nombre,
                     _tipoAccesorio: accesorio._tipoAccesorio,
                     _precio: accesorio._precio,
@@ -366,16 +363,18 @@ class DatoRoutes {
                 console.log('elijo cañon');
                 objAccesorio = new SCHaccesorio_1.SAccesorio({
                     _codArma: accesorio._codArma,
+                    _idAccesorio: accesorio._idAccesorio,
                     _nombre: accesorio._nombre,
                     _tipoAccesorio: accesorio._tipoAccesorio,
                     _precio: accesorio._precio,
-                    _longitudCañon: accesorio._longitudCañon
+                    _longitudCanon: accesorio._longitudCanon
                 });
             }
             else {
                 console.log('elijo mirilla');
                 objAccesorio = new SCHaccesorio_1.SAccesorio({
                     _codArma: accesorio._codArma,
+                    _idAccesorio: accesorio._idAccesorio,
                     _nombre: accesorio._nombre,
                     _tipoAccesorio: accesorio._tipoAccesorio,
                     _precio: accesorio._precio,
@@ -403,6 +402,7 @@ class DatoRoutes {
                     console.log("elijo cargador");
                     yield SCHaccesorio_1.SAccesorio.findOneAndUpdate({ _codArma: cod }, {
                         _codArma: modaccesorio._codArma,
+                        _idAccesorio: modaccesorio._idAccesorio,
                         _nombre: modaccesorio._nombre,
                         _tipoAccesorio: modaccesorio._tipoAccesorio,
                         _precio: modaccesorio._precio,
@@ -415,6 +415,7 @@ class DatoRoutes {
                     console.log("elijo bombardero");
                     yield SCHaccesorio_1.SAccesorio.findOneAndUpdate({ _codArma: cod }, {
                         _codArma: modaccesorio._codArma,
+                        _idAccesorio: modaccesorio._idAccesorio,
                         _nombre: modaccesorio._nombre,
                         _tipoAccesorio: modaccesorio._tipoAccesorio,
                         _precio: modaccesorio._precio,
@@ -425,8 +426,9 @@ class DatoRoutes {
                 }
                 else {
                     console.log("solo disparo");
-                    yield SCHaccesorio_1.SAccesorio.findOneAndUpdate({ _codArma: cod }, {
+                    yield SCHaccesorio_1.SAccesorio.findOneAndUpdate({ _idAccesorio: cod }, {
                         _codArma: modaccesorio._codArma,
+                        _idAccesorio: modaccesorio._idAccesorio,
                         _nombre: modaccesorio._nombre,
                         _tipoAccesorio: modaccesorio._tipoAccesorio,
                         _precio: modaccesorio._precio,
@@ -450,6 +452,60 @@ class DatoRoutes {
                 .catch((error) => res.send('Error:  ' + error));
             yield database_1.db.desconectarBD();
         });
+        //ACCESORIO
+        this.montoArma = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const cod = req.params.cod;
+            yield database_1.db.conectarBD()
+                .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
+                console.log(mensaje);
+                let tmpAccesorio = new accesorio_1.Accesorio("", "", "", "", 0);
+                let armaMontada = new arma_1.Arma("", "", new Date, 0, false, "", false, 0);
+                let dArma;
+                let dAccesorio;
+                let query2 = yield SCHaccesorio_1.SAccesorio.find({ _codArma: cod });
+                let query = yield SCHarmamento_1.SArma.find({ _codArma: cod });
+                for (dArma of query) {
+                    armaMontada = new arma_1.Arma(dArma._codArma, dArma._nombreArma, dArma._fechaProduccion, dArma._precioBase, dArma._disparoAutomatico, dArma._categoriaArma, dArma._animaRayada, dArma._calibre);
+                }
+                let valorAr = armaMontada.valorF();
+                let valorAc = 0;
+                let valorAc2 = 0;
+                //let arrayA = []
+                for (dAccesorio of query2) {
+                    tmpAccesorio = new accesorio_1.Accesorio(dAccesorio._codArma, dAccesorio._idAccesorio, dAccesorio._nombre, dAccesorio._tipoAccesorio, dAccesorio._precio);
+                    valorAc = tmpAccesorio.setPrecioF();
+                    valorAc2 += valorAc;
+                }
+                //console.log(valorAr);
+                console.log(valorAc2);
+                let valorT = valorAc2 + valorAr;
+                /*
+                arrayA.forEach(element => {
+                    armaMontada.addAccesorio(element)
+                    
+                });
+                */
+                /*
+                console.log(query2)
+                console.log(arrayA)
+                console.log(armaMontada.accesorio)
+                let valorAccesorios: any;
+                let a = new Accesorio("","","",0)
+                for ( a of armaMontada.accesorio){
+                     valorAccesorios += a.setPrecioF()
+                     console.log(a.setPrecioF)
+                }
+                console.log('valor accesorios', valorAccesorios)
+                
+                */
+                console.log(valorAr);
+                res.json(valorT);
+            }))
+                .catch((mensaje) => {
+                res.send(mensaje);
+            });
+            yield database_1.db.desconectarBD();
+        });
         this._router = (0, express_1.Router)();
     }
     get router() {
@@ -469,7 +525,7 @@ class DatoRoutes {
         this._router.put('/modificoTirador/:cod', this.modificoTirador);
         this._router.delete('/borroTirador/:cod', this.borroTirador);
         // RUTAS BASICAS EQUIPO
-        this._router.get('/listaEquipo', this.listoEquipos);
+        this._router.get('/listaEquipos', this.listoEquipos);
         this._router.post('/nuevoEquipo', this.newEquipo);
         this._router.get('/obtengoEquipo/:cod', this.obtengoEquipo);
         this._router.put('/modificoEquipo/:cod', this.modificoEquipo);
@@ -480,6 +536,8 @@ class DatoRoutes {
         this._router.get('/obtengoAccesorio/:cod', this.obtengoAccesorio);
         this._router.put('/modificoAccesorio/:cod', this.modificoAccesorio);
         this._router.delete('/borroAccesorio/:cod', this.borroAccesorio);
+        //RUTA CALCULO
+        this._router.get('/monto/:cod', this.montoArma);
     }
 }
 const obj = new DatoRoutes();

@@ -26,6 +26,6 @@ const armaSchema = new mongoose_1.Schema({
     },
     _calibre: {
         type: Number
-    }
+    },
 });
 exports.SArma = (0, mongoose_1.model)('armas', armaSchema);

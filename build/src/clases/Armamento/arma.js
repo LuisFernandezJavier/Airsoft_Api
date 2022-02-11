@@ -41,5 +41,31 @@ class Arma {
     get accesorio() {
         return this._accesorio;
     }
+    addAccesorio(accesorio) {
+        this._accesorio.push(accesorio);
+    }
+    valorF() {
+        let hoy = new Date();
+        let añosA = hoy.getFullYear() - this._fechaProduccion.getFullYear();
+        if (añosA > 2) {
+            this._precioBase = this._precioBase - (this._precioBase * 0.25);
+        }
+        else if (añosA > 5 && añosA < 10) {
+            this._precioBase = this._precioBase - (this._precioBase * 0.35);
+        }
+        else if (añosA > 10) {
+            this._precioBase = this._precioBase - (this._precioBase * 0.40);
+        }
+        if (this._calibre > 0.8) {
+            this._precioBase = this._precioBase + 20;
+        }
+        if (this._animaRayada == true) {
+            this._precioBase = this._precioBase + 150;
+        }
+        if (this._disparoAutomatico == true) {
+            this._precioBase = this._precioBase + 150;
+        }
+        return this._precioBase;
+    }
 }
 exports.Arma = Arma;

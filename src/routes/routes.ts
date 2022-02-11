@@ -3,8 +3,10 @@ import { db } from '../database/database';
 
 import { SArma, iArma } from '../model/SCHarmamento';
 import { SEquipo } from '../model/SCHequipo';
-import { SAccesorio } from '../model/SCHaccesorio';
+import { iAccesorio, SAccesorio } from '../model/SCHaccesorio';
 import { STirador } from '../model/SCHtirador';
+import { Arma } from '../clases/Armamento/arma';
+import { Accesorio } from '../clases/Accesorio/accesorio';
 
 
 
@@ -174,6 +176,7 @@ class DatoRoutes {
                 _codArma: tirador._codArma,
                 _codEquipo: tirador._codEquipo,
                 _nombre: tirador._nombre,
+                _rolTirador: tirador.rolTirador,
                 _bajas: tirador._bajas,
                 _muertes: tirador._muertes,
                 _fechaInscripcion: tirador._fechaInscripcion
@@ -200,10 +203,7 @@ class DatoRoutes {
         await db.conectarBD()
             .then(async (mensaje) => {
                 console.log(mensaje)
-                const query = await STirador.aggregate([
-                    {
-                        $match: { "_codArma": cod }
-                    }])
+                const query = await STirador.find({_codArma : cod})
                 res.json(query)
             })
             .catch((mensaje) => {
@@ -261,6 +261,7 @@ class DatoRoutes {
                             _codArma: modtirador._codArma,
                             _codEquipo: modtirador._codEquipo,
                             _nombre: modtirador._nombre,
+                            _rolTirador:modtirador._rolTirador,
                             _bajas: modtirador._bajas,
                             _muertes: modtirador._muertes,
                             _fechaInscripcion: modtirador._fechaInscripcion,
@@ -406,10 +407,7 @@ class DatoRoutes {
         await db.conectarBD()
             .then(async (mensaje) => {
                 console.log(mensaje)
-                const query = await SAccesorio.aggregate([
-                    {
-                        $match: { "_codArma": cod }
-                    }])
+                const query = await SAccesorio.find ({_idAccesorio : cod})
                 res.json(query)
             })
             .catch((mensaje) => {
@@ -427,6 +425,7 @@ class DatoRoutes {
             console.log("elijo cargador");
             objAccesorio = new SAccesorio({
                 _codArma: accesorio._codArma,
+                _idAccesorio: accesorio._idAccesorio,
                 _nombre: accesorio._nombre,
                 _tipoAccesorio: accesorio._tipoAccesorio,
                 _precio: accesorio._precio,
@@ -437,15 +436,17 @@ class DatoRoutes {
             console.log('elijo cañon');
             objAccesorio = new SAccesorio({
                 _codArma: accesorio._codArma,
+                _idAccesorio: accesorio._idAccesorio,
                 _nombre: accesorio._nombre,
                 _tipoAccesorio: accesorio._tipoAccesorio,
                 _precio: accesorio._precio,
-                _longitudCañon: accesorio._longitudCañon
+                _longitudCanon: accesorio._longitudCanon
             });
         } else {
             console.log('elijo mirilla');
             objAccesorio = new SAccesorio({
                 _codArma: accesorio._codArma,
+                _idAccesorio: accesorio._idAccesorio,
                 _nombre: accesorio._nombre,
                 _tipoAccesorio: accesorio._tipoAccesorio,
                 _precio: accesorio._precio,
@@ -480,6 +481,7 @@ class DatoRoutes {
                         { _codArma: cod },
                         {
                             _codArma: modaccesorio._codArma,
+                            _idAccesorio: modaccesorio._idAccesorio,
                             _nombre: modaccesorio._nombre,
                             _tipoAccesorio: modaccesorio._tipoAccesorio,
                             _precio: modaccesorio._precio,
@@ -495,6 +497,7 @@ class DatoRoutes {
                         { _codArma: cod },
                         {
                             _codArma: modaccesorio._codArma,
+                            _idAccesorio: modaccesorio._idAccesorio,
                             _nombre: modaccesorio._nombre,
                             _tipoAccesorio: modaccesorio._tipoAccesorio,
                             _precio: modaccesorio._precio,
@@ -507,9 +510,10 @@ class DatoRoutes {
                 } else {
                     console.log("solo disparo");
                     await SAccesorio.findOneAndUpdate(
-                        { _codArma: cod },
+                        { _idAccesorio: cod },
                         {
                             _codArma: modaccesorio._codArma,
+                            _idAccesorio: modaccesorio._idAccesorio,
                             _nombre: modaccesorio._nombre,
                             _tipoAccesorio: modaccesorio._tipoAccesorio,
                             _precio: modaccesorio._precio,
@@ -539,6 +543,80 @@ class DatoRoutes {
             .then((doc: any) => res.send("Documento borrado " + doc))
             .catch((error: any) => res.send('Error:  ' + error))
         await db.desconectarBD()
+    }
+
+    //ACCESORIO
+    private montoArma = async (req: Request, res: Response) => {
+        const cod = req.params.cod
+        await db.conectarBD()
+            .then(async (mensaje) => {
+                console.log(mensaje)
+                let tmpAccesorio: Accesorio = new Accesorio ("","","","", 0);
+                let armaMontada: Arma = new Arma ("","",new Date,0 ,false,"",false,0,);
+                let dArma: iArma
+                let dAccesorio: iAccesorio
+                
+                let query2: any = await SAccesorio.find({_codArma: cod})
+                let query: any = await SArma.find({_codArma: cod})
+                for ( dArma of query) {
+                    armaMontada = new Arma(
+                        dArma._codArma,
+                        dArma._nombreArma,
+                        dArma._fechaProduccion,
+                        dArma._precioBase,
+                        dArma._disparoAutomatico,
+                        dArma._categoriaArma,
+                        dArma._animaRayada,
+                        dArma._calibre ,
+                        
+                    )
+                }
+                let valorAr = armaMontada.valorF() 
+                let valorAc: number = 0
+                let valorAc2: number = 0
+                
+                //let arrayA = []
+
+                for (dAccesorio of query2) {
+                    tmpAccesorio = new Accesorio(dAccesorio._codArma,dAccesorio._idAccesorio, dAccesorio._nombre, dAccesorio._tipoAccesorio, dAccesorio._precio);
+                    valorAc = tmpAccesorio.setPrecioF()
+                    valorAc2 += valorAc
+                }
+                //console.log(valorAr);
+                console.log(valorAc2)
+                let valorT = valorAc2 + valorAr
+
+                /*
+                arrayA.forEach(element => {
+                    armaMontada.addAccesorio(element)
+                    
+                });
+                */
+                /*
+                console.log(query2)
+                console.log(arrayA)
+                console.log(armaMontada.accesorio)
+                let valorAccesorios: any;
+                let a = new Accesorio("","","",0)
+                for ( a of armaMontada.accesorio){
+                     valorAccesorios += a.setPrecioF()
+                     console.log(a.setPrecioF)
+                }
+                console.log('valor accesorios', valorAccesorios)
+                
+                */
+               console.log(valorAr)
+                res.json( valorT )
+                
+
+
+
+
+            })
+            .catch((mensaje) => {
+                res.send(mensaje)
+            })
+            await db.desconectarBD()
     }
 
 
@@ -575,6 +653,9 @@ class DatoRoutes {
         this._router.get('/obtengoAccesorio/:cod', this.obtengoAccesorio)
         this._router.put('/modificoAccesorio/:cod', this.modificoAccesorio)
         this._router.delete('/borroAccesorio/:cod', this.borroAccesorio)
+
+        //RUTA CALCULO
+        this._router.get('/monto/:cod', this.montoArma)
     }
 
 }

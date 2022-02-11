@@ -6,6 +6,9 @@ const accesorioSchema = new mongoose_1.Schema({
     _codArma: {
         type: String
     },
+    _idAccesorio: {
+        type: String
+    },
     _nombre: {
         type: String
     },
@@ -15,7 +18,7 @@ const accesorioSchema = new mongoose_1.Schema({
     _precio: {
         type: Number
     },
-    _longitudCañon: {
+    _longitudCanon: {
         type: Number
     },
     _numeroBalas: {
