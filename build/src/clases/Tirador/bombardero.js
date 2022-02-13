@@ -10,5 +10,11 @@ class Bombardero extends tirador_1.Tirador {
     get explosivoDetonado() {
         return this._explosivoDetonado;
     }
+    KDA() {
+        let media;
+        media = super.KDA();
+        media = media + (this._explosivoDetonado / this._muertes);
+        return media;
+    }
 }
 exports.Bombardero = Bombardero;

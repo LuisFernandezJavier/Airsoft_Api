@@ -45,4 +45,6 @@ export type iArma = {
 
 
 
+
+
 export const SArma = model('armas', armaSchema) 

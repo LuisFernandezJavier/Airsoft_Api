@@ -32,5 +32,10 @@ class Tirador {
     get fechaInscripcion() {
         return this._fechaInscripcion;
     }
+    KDA() {
+        let media;
+        media = (this._bajas / this._muertes);
+        return media;
+    }
 }
 exports.Tirador = Tirador;

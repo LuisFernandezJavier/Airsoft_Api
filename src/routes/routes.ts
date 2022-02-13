@@ -3,10 +3,17 @@ import { db } from '../database/database';
 
 import { SArma, iArma } from '../model/SCHarmamento';
 import { SEquipo } from '../model/SCHequipo';
-import { iAccesorio, SAccesorio } from '../model/SCHaccesorio';
-import { STirador } from '../model/SCHtirador';
+import { iAccesorio, SAccesorio, xAccesorio } from '../model/SCHaccesorio';
+import { iBombardero, iCurador, iTirador, STirador, XTirador } from '../model/SCHtirador';
 import { Arma } from '../clases/Armamento/arma';
 import { Accesorio } from '../clases/Accesorio/accesorio';
+import { Tirador } from '../clases/Tirador/tirador';
+import { Curador } from '../clases/Tirador/curador';
+import { Bombardero } from '../clases/Tirador/bombardero';
+import { Cargador } from '../clases/Accesorio/cargador';
+import { Cañon } from '../clases/Accesorio/cañon';
+import { Mirilla } from '../clases/Accesorio/mirilla';
+import { Equipo } from '../clases/Equipo/equipo';
 
 
 
@@ -203,7 +210,7 @@ class DatoRoutes {
         await db.conectarBD()
             .then(async (mensaje) => {
                 console.log(mensaje)
-                const query = await STirador.find({_codArma : cod})
+                const query = await STirador.find({ _codArma: cod })
                 res.json(query)
             })
             .catch((mensaje) => {
@@ -261,7 +268,7 @@ class DatoRoutes {
                             _codArma: modtirador._codArma,
                             _codEquipo: modtirador._codEquipo,
                             _nombre: modtirador._nombre,
-                            _rolTirador:modtirador._rolTirador,
+                            _rolTirador: modtirador._rolTirador,
                             _bajas: modtirador._bajas,
                             _muertes: modtirador._muertes,
                             _fechaInscripcion: modtirador._fechaInscripcion,
@@ -294,10 +301,11 @@ class DatoRoutes {
     // funciones basicas para los equipos
 
     private listoEquipos = async (req: Request, res: Response) => {
+        const cod = req.params.cod
         await db.conectarBD()
             .then(async (mensaje) => {
                 console.log(mensaje)
-                const query = await SEquipo.find({})
+                const query = await STirador.find({_codEquipo : cod})
                 res.json(query)
             })
             .catch((mensaje) => {
@@ -407,7 +415,20 @@ class DatoRoutes {
         await db.conectarBD()
             .then(async (mensaje) => {
                 console.log(mensaje)
-                const query = await SAccesorio.find ({_idAccesorio : cod})
+                const query = await SAccesorio.find({ _idAccesorio: cod })
+                res.json(query)
+            })
+            .catch((mensaje) => {
+                res.send(mensaje)
+            })
+    }
+
+    private obtengoAccesorioCodArma = async (req: Request, res: Response) => {
+        const cod = req.params.cod
+        await db.conectarBD()
+            .then(async (mensaje) => {
+                console.log(mensaje)
+                const query = await SAccesorio.find({ _codArma: cod })
                 res.json(query)
             })
             .catch((mensaje) => {
@@ -545,20 +566,20 @@ class DatoRoutes {
         await db.desconectarBD()
     }
 
-    //ACCESORIO
-    private montoArma = async (req: Request, res: Response) => {
+    // FUNCIONES CON CALCULOS
+    private valorArma = async (req: Request, res: Response) => {
         const cod = req.params.cod
         await db.conectarBD()
             .then(async (mensaje) => {
                 console.log(mensaje)
-                let tmpAccesorio: Accesorio = new Accesorio ("","","","", 0);
-                let armaMontada: Arma = new Arma ("","",new Date,0 ,false,"",false,0,);
+                let tmpAccesorio: Accesorio = new Accesorio("", "", "", "", 0);
+                let armaMontada: Arma = new Arma("", "", new Date, 0, false, "", false, 0,);
                 let dArma: iArma
                 let dAccesorio: iAccesorio
-                
-                let query2: any = await SAccesorio.find({_codArma: cod})
-                let query: any = await SArma.find({_codArma: cod})
-                for ( dArma of query) {
+
+                let query2: any = await SAccesorio.find({ _codArma: cod })
+                let query: any = await SArma.find({ _codArma: cod })
+                for (dArma of query) {
                     armaMontada = new Arma(
                         dArma._codArma,
                         dArma._nombreArma,
@@ -568,17 +589,17 @@ class DatoRoutes {
                         dArma._categoriaArma,
                         dArma._animaRayada,
                         dArma._calibre ,
-                        
+
                     )
                 }
-                let valorAr = armaMontada.valorF() 
+                let valorAr = armaMontada.valorF()
                 let valorAc: number = 0
                 let valorAc2: number = 0
-                
+
                 //let arrayA = []
 
                 for (dAccesorio of query2) {
-                    tmpAccesorio = new Accesorio(dAccesorio._codArma,dAccesorio._idAccesorio, dAccesorio._nombre, dAccesorio._tipoAccesorio, dAccesorio._precio);
+                    tmpAccesorio = new Accesorio(dAccesorio._codArma, dAccesorio._idAccesorio, dAccesorio._nombre, dAccesorio._tipoAccesorio, dAccesorio._precio);
                     valorAc = tmpAccesorio.setPrecioF()
                     valorAc2 += valorAc
                 }
@@ -586,28 +607,10 @@ class DatoRoutes {
                 console.log(valorAc2)
                 let valorT = valorAc2 + valorAr
 
-                /*
-                arrayA.forEach(element => {
-                    armaMontada.addAccesorio(element)
-                    
-                });
-                */
-                /*
-                console.log(query2)
-                console.log(arrayA)
-                console.log(armaMontada.accesorio)
-                let valorAccesorios: any;
-                let a = new Accesorio("","","",0)
-                for ( a of armaMontada.accesorio){
-                     valorAccesorios += a.setPrecioF()
-                     console.log(a.setPrecioF)
-                }
-                console.log('valor accesorios', valorAccesorios)
-                
-                */
-               console.log(valorAr)
-                res.json( valorT )
-                
+               
+                console.log(valorAr)
+                res.json(valorT)
+
 
 
 
@@ -616,8 +619,258 @@ class DatoRoutes {
             .catch((mensaje) => {
                 res.send(mensaje)
             })
-            await db.desconectarBD()
+        await db.desconectarBD()
     }
+
+
+    private KDATirador = async (req: Request, res: Response) => {
+        const cod = req.params.cod
+        await db.conectarBD()
+            .then(async (mensaje) => {
+                console.log(mensaje)
+                
+                let objeto: any
+                let dTirador: iTirador
+                let dCurador: iCurador
+                let dBombardero: iBombardero
+
+
+
+                const query: any = await STirador.find({ _codArma: cod })
+
+                if (query[0]._rolTirador == "Tirador") {
+                    for (dTirador of query) {
+                        objeto = new Tirador(
+                            dTirador._codArma,
+                            dTirador._codEquipo,
+                            dTirador._nombre,
+                            dTirador._rolTirador,
+                            dTirador._bajas,
+                            dTirador._muertes,
+                            dTirador._fechaInscripcion
+                        )
+                    }
+                } else if (query[0]._rolTirador == "Curador") {
+                    for (dCurador of query) {
+                        objeto = new Curador(
+                            dCurador._codArma,
+                            dCurador._codEquipo,
+                            dCurador._nombre,
+                            dCurador._rolTirador,
+                            dCurador._bajas,
+                            dCurador._muertes,
+                            dCurador._fechaInscripcion,
+                            dCurador._revivido
+                        )
+                    }
+                } else {
+                    for (dBombardero of query) {
+                        objeto = new Bombardero(
+                            dBombardero._codArma,
+                            dBombardero._codEquipo,
+                            dBombardero._nombre,
+                            dBombardero._rolTirador,
+                            dBombardero._bajas,
+                            dBombardero._muertes,
+                            dBombardero._fechaInscripcion,
+                            dBombardero._explosivoDetonado
+                        )
+                    }
+                }
+                console.log(objeto._bajas)
+                console.log(objeto._muertes)
+                console.log("SOY", query[0]._rolTirador)
+                console.log("revivo", objeto._revivido)
+                console.log(objeto.KDA())
+
+
+
+                res.json(objeto.KDA())
+            })
+            .catch((mensaje) => {
+                res.send(mensaje)
+            })
+    }
+
+
+    private KDAEQUIPO = async (req: Request, res: Response) => {
+        const cod = req.params.cod
+        await db.conectarBD()
+            .then(async (mensaje) => {
+                console.log(mensaje)
+
+                let arrayT: Tirador[] = []
+                let dTirador: Tirador = new Tirador ("","","","",0,0,new Date())
+                
+
+               
+                const query: any = await STirador.find({ _codEquipo: cod })
+                console.log(query)
+
+                for (let a of query){
+                    if (a._rolTirador == "Tirador") {
+                        
+                            dTirador = new Tirador(
+                                a._codArma,
+                                a._codEquipo,
+                                a._nombre,
+                                a._rolTirador,
+                                a._bajas,
+                                a._muertes,
+                                a._fechaInscripcion
+                            )
+                            arrayT.push(dTirador)
+                        
+                    } else if (a._rolTirador == "Curador") {
+                        
+                            dTirador = new Curador(
+                                a._codArma,
+                                a._codEquipo,
+                                a._nombre,
+                                a._rolTirador,
+                                a._bajas,
+                                a._muertes,
+                                a._fechaInscripcion,
+                                a._revivido
+                            )
+                            arrayT.push(dTirador)
+                        
+                    } else {
+                        
+                            dTirador = new Bombardero(
+                                a._codArma,
+                                a._codEquipo,
+                                a._nombre,
+                                a._rolTirador,
+                                a._bajas,
+                                a._muertes,
+                                a._fechaInscripcion,
+                                a._explosivoDetonado
+                            )
+                            arrayT.push(dTirador)
+                        
+                    }
+                }
+
+            
+
+                //recorro los tiradores del equipo y calculo sus kda
+                let kdaNom :  any [] = []
+                
+                let tmpkda : number = 0
+                arrayT.forEach(element => {
+                      tmpkda=element.KDA()
+                      let nombre = element.nombre
+                      let codArma = element.codArma
+                      let bajas = element.bajas
+                      let muertes = element.muertes
+                      kdaNom.push({nombre,tmpkda,codArma , bajas , muertes})
+                      
+                     
+                })
+                res.json(kdaNom)
+            })
+            .catch((mensaje) => {
+                res.send(mensaje)
+            })
+    }
+
+
+
+
+
+
+    private ArmayAcesorio = async (req: Request, res: Response) => {
+        const cod = req.params.cod
+        await db.conectarBD()
+            .then(async (mensaje) => {
+                console.log(mensaje)
+                let tmpAccesorio: Accesorio = new Accesorio("", "", "", "", 0);
+                let armaMontada: Arma = new Arma("", "", new Date, 0, false, "", false, 0,);
+                let dArma: iArma
+                let dAccesorio: xAccesorio
+
+                let query2: any = await SAccesorio.find({ _codArma: cod })
+                let query: any = await SArma.find({ _codArma: cod })
+
+                //creo el objeto ARMA
+                for (dArma of query) {
+                    armaMontada = new Arma(
+                        dArma._codArma,
+                        dArma._nombreArma,
+                        dArma._fechaProduccion,
+                        dArma._precioBase,
+                        dArma._disparoAutomatico,
+                        dArma._categoriaArma,
+                        dArma._animaRayada,
+                        dArma._calibre ,
+
+                    )
+                }
+                //calculo el valor del arma 
+                let precioArma: number = armaMontada.valorF()
+
+                
+                // creo el objeto accesorio (cualquiera de los que exiten)
+                let arrayA: Accesorio[] = []
+
+                for (dAccesorio of query2) {
+                    if (query2._tipoAccesorio == "Cargador") {
+                        tmpAccesorio = new Cargador(
+                            dAccesorio._codArma,
+                            dAccesorio._idAccesorio,
+                            dAccesorio._nombre,
+                            dAccesorio._tipoAccesorio,
+                            dAccesorio._precio,
+                            dAccesorio._numeroBalas)
+                    } else if (query2._tipoAccesorio == "Cañon") {
+                        tmpAccesorio = new Cañon(
+                            dAccesorio._codArma,
+                            dAccesorio._idAccesorio,
+                            dAccesorio._nombre,
+                            dAccesorio._tipoAccesorio,
+                            dAccesorio._precio,
+                            dAccesorio._longitudCanon)
+                    } else {
+                        tmpAccesorio = new Mirilla(
+                            dAccesorio._codArma,
+                            dAccesorio._idAccesorio,
+                            dAccesorio._nombre,
+                            dAccesorio._tipoAccesorio,
+                            dAccesorio._precio,
+                            dAccesorio._zoom,
+                            dAccesorio._tipoAccesorio)
+                    }
+                    arrayA.push(tmpAccesorio)
+                }
+
+                // monto los accesorios en el arma 
+                arrayA.forEach(element => {
+                    armaMontada.addAccesorio(element)
+                })
+
+                //recorro el array de accesorios del objeto armamontada y sumo todo sus precios
+                let precioAccesorios: number = 0
+                for (let a of armaMontada.accesorio) {
+                    precioAccesorios += a.setPrecioF()
+                }
+
+                console.log("precio ac", precioAccesorios)
+                console.log(precioArma)
+                let valorTotalFinal : number = (precioAccesorios+precioArma)
+                
+                console.log(valorTotalFinal)
+                res.json(valorTotalFinal)
+
+
+
+            })
+            .catch((mensaje) => {
+                res.send(mensaje)
+            })
+        await db.desconectarBD()
+    }
+
 
 
 
@@ -641,7 +894,7 @@ class DatoRoutes {
         this._router.delete('/borroTirador/:cod', this.borroTirador)
 
         // RUTAS BASICAS EQUIPO
-        this._router.get('/listaEquipos', this.listoEquipos)
+        this._router.get('/listaEquipos/:cod', this.listoEquipos)
         this._router.post('/nuevoEquipo', this.newEquipo)
         this._router.get('/obtengoEquipo/:cod', this.obtengoEquipo)
         this._router.put('/modificoEquipo/:cod', this.modificoEquipo)
@@ -651,11 +904,15 @@ class DatoRoutes {
         this._router.get('/listaAccesorios', this.listoAccesorios)
         this._router.post('/nuevoAccesorio', this.newAccesorio)
         this._router.get('/obtengoAccesorio/:cod', this.obtengoAccesorio)
+        this._router.get('/obtengoAccesorioCA/:cod', this.obtengoAccesorioCodArma)
         this._router.put('/modificoAccesorio/:cod', this.modificoAccesorio)
         this._router.delete('/borroAccesorio/:cod', this.borroAccesorio)
 
         //RUTA CALCULO
-        this._router.get('/monto/:cod', this.montoArma)
+        this._router.get('/valorArma/:cod', this.valorArma)
+        this._router.get('/KDA/:cod', this.KDATirador)
+        this._router.get('/armaMontada/:cod', this.ArmayAcesorio)
+        this._router.get('/KDAequipo/:cod', this.KDAEQUIPO)
     }
 
 }

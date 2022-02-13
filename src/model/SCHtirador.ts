@@ -10,7 +10,7 @@ export const tiradorSchema = new Schema({
     _nombre: {
         type: String
     },
-    _rolTirador:{
+    _rolTirador: {
         type: String
     },
     _bajas: {
@@ -30,7 +30,50 @@ export const tiradorSchema = new Schema({
     }
 })
 
+export type iTirador = {
+    _codArma: string,
+    _codEquipo: string,
+    _nombre: string,
+    _rolTirador: string,
+    _bajas: number,
+    _muertes: number,
+    _fechaInscripcion: Date,
+}
+
+export type iCurador = {
+    _codArma: string,
+    _codEquipo: string,
+    _nombre: string,
+    _rolTirador: string,
+    _bajas: number,
+    _muertes: number,
+    _fechaInscripcion: Date,
+    _revivido: number,
+}
+export type iBombardero = {
+    _codArma: string,
+    _codEquipo: string,
+    _nombre: string,
+    _rolTirador: string,
+    _bajas: number,
+    _muertes: number,
+    _fechaInscripcion: Date,
+    _explosivoDetonado: number
+}
+
+export type XTirador = {
+    _codArma: string,
+    _codEquipo: string,
+    _nombre: string,
+    _rolTirador: string,
+    _bajas: number,
+    _muertes: number,
+    _fechaInscripcion: Date,
+    _revivido: number,
+    _explosivoDetonado: number
+}
 
 
-export const STirador = model('tiradores', tiradorSchema) 
+
+export const STirador = model('tiradores', tiradorSchema)
 

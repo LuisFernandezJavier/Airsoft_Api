@@ -18,6 +18,12 @@ const SCHaccesorio_1 = require("../model/SCHaccesorio");
 const SCHtirador_1 = require("../model/SCHtirador");
 const arma_1 = require("../clases/Armamento/arma");
 const accesorio_1 = require("../clases/Accesorio/accesorio");
+const tirador_1 = require("../clases/Tirador/tirador");
+const curador_1 = require("../clases/Tirador/curador");
+const bombardero_1 = require("../clases/Tirador/bombardero");
+const cargador_1 = require("../clases/Accesorio/cargador");
+const ca_on_1 = require("../clases/Accesorio/ca\u00F1on");
+const mirilla_1 = require("../clases/Accesorio/mirilla");
 class DatoRoutes {
     constructor() {
         // funciones basicas para las armas
@@ -246,10 +252,11 @@ class DatoRoutes {
         });
         // funciones basicas para los equipos
         this.listoEquipos = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const cod = req.params.cod;
             yield database_1.db.conectarBD()
                 .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
                 console.log(mensaje);
-                const query = yield SCHequipo_1.SEquipo.find({});
+                const query = yield SCHtirador_1.STirador.find({ _codEquipo: cod });
                 res.json(query);
             }))
                 .catch((mensaje) => {
@@ -338,6 +345,18 @@ class DatoRoutes {
                 .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
                 console.log(mensaje);
                 const query = yield SCHaccesorio_1.SAccesorio.find({ _idAccesorio: cod });
+                res.json(query);
+            }))
+                .catch((mensaje) => {
+                res.send(mensaje);
+            });
+        });
+        this.obtengoAccesorioCodArma = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const cod = req.params.cod;
+            yield database_1.db.conectarBD()
+                .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
+                console.log(mensaje);
+                const query = yield SCHaccesorio_1.SAccesorio.find({ _codArma: cod });
                 res.json(query);
             }))
                 .catch((mensaje) => {
@@ -452,8 +471,8 @@ class DatoRoutes {
                 .catch((error) => res.send('Error:  ' + error));
             yield database_1.db.desconectarBD();
         });
-        //ACCESORIO
-        this.montoArma = (req, res) => __awaiter(this, void 0, void 0, function* () {
+        // FUNCIONES CON CALCULOS
+        this.valorArma = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const cod = req.params.cod;
             yield database_1.db.conectarBD()
                 .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
@@ -479,27 +498,135 @@ class DatoRoutes {
                 //console.log(valorAr);
                 console.log(valorAc2);
                 let valorT = valorAc2 + valorAr;
-                /*
-                arrayA.forEach(element => {
-                    armaMontada.addAccesorio(element)
-                    
-                });
-                */
-                /*
-                console.log(query2)
-                console.log(arrayA)
-                console.log(armaMontada.accesorio)
-                let valorAccesorios: any;
-                let a = new Accesorio("","","",0)
-                for ( a of armaMontada.accesorio){
-                     valorAccesorios += a.setPrecioF()
-                     console.log(a.setPrecioF)
-                }
-                console.log('valor accesorios', valorAccesorios)
-                
-                */
                 console.log(valorAr);
                 res.json(valorT);
+            }))
+                .catch((mensaje) => {
+                res.send(mensaje);
+            });
+            yield database_1.db.desconectarBD();
+        });
+        this.KDATirador = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const cod = req.params.cod;
+            yield database_1.db.conectarBD()
+                .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
+                console.log(mensaje);
+                let objeto;
+                let dTirador;
+                let dCurador;
+                let dBombardero;
+                const query = yield SCHtirador_1.STirador.find({ _codArma: cod });
+                if (query[0]._rolTirador == "Tirador") {
+                    for (dTirador of query) {
+                        objeto = new tirador_1.Tirador(dTirador._codArma, dTirador._codEquipo, dTirador._nombre, dTirador._rolTirador, dTirador._bajas, dTirador._muertes, dTirador._fechaInscripcion);
+                    }
+                }
+                else if (query[0]._rolTirador == "Curador") {
+                    for (dCurador of query) {
+                        objeto = new curador_1.Curador(dCurador._codArma, dCurador._codEquipo, dCurador._nombre, dCurador._rolTirador, dCurador._bajas, dCurador._muertes, dCurador._fechaInscripcion, dCurador._revivido);
+                    }
+                }
+                else {
+                    for (dBombardero of query) {
+                        objeto = new bombardero_1.Bombardero(dBombardero._codArma, dBombardero._codEquipo, dBombardero._nombre, dBombardero._rolTirador, dBombardero._bajas, dBombardero._muertes, dBombardero._fechaInscripcion, dBombardero._explosivoDetonado);
+                    }
+                }
+                console.log(objeto._bajas);
+                console.log(objeto._muertes);
+                console.log("SOY", query[0]._rolTirador);
+                console.log("revivo", objeto._revivido);
+                console.log(objeto.KDA());
+                res.json(objeto.KDA());
+            }))
+                .catch((mensaje) => {
+                res.send(mensaje);
+            });
+        });
+        this.KDAEQUIPO = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const cod = req.params.cod;
+            yield database_1.db.conectarBD()
+                .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
+                console.log(mensaje);
+                let arrayT = [];
+                let dTirador = new tirador_1.Tirador("", "", "", "", 0, 0, new Date());
+                const query = yield SCHtirador_1.STirador.find({ _codEquipo: cod });
+                console.log(query);
+                for (let a of query) {
+                    if (a._rolTirador == "Tirador") {
+                        dTirador = new tirador_1.Tirador(a._codArma, a._codEquipo, a._nombre, a._rolTirador, a._bajas, a._muertes, a._fechaInscripcion);
+                        arrayT.push(dTirador);
+                    }
+                    else if (a._rolTirador == "Curador") {
+                        dTirador = new curador_1.Curador(a._codArma, a._codEquipo, a._nombre, a._rolTirador, a._bajas, a._muertes, a._fechaInscripcion, a._revivido);
+                        arrayT.push(dTirador);
+                    }
+                    else {
+                        dTirador = new bombardero_1.Bombardero(a._codArma, a._codEquipo, a._nombre, a._rolTirador, a._bajas, a._muertes, a._fechaInscripcion, a._explosivoDetonado);
+                        arrayT.push(dTirador);
+                    }
+                }
+                //recorro los tiradores del equipo y calculo sus kda
+                let kdaNom = [];
+                let tmpkda = 0;
+                arrayT.forEach(element => {
+                    tmpkda = element.KDA();
+                    let nombre = element.nombre;
+                    let codArma = element.codArma;
+                    let bajas = element.bajas;
+                    let muertes = element.muertes;
+                    kdaNom.push({ nombre, tmpkda, codArma, bajas, muertes });
+                });
+                res.json(kdaNom);
+            }))
+                .catch((mensaje) => {
+                res.send(mensaje);
+            });
+        });
+        this.ArmayAcesorio = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const cod = req.params.cod;
+            yield database_1.db.conectarBD()
+                .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
+                console.log(mensaje);
+                let tmpAccesorio = new accesorio_1.Accesorio("", "", "", "", 0);
+                let armaMontada = new arma_1.Arma("", "", new Date, 0, false, "", false, 0);
+                let dArma;
+                let dAccesorio;
+                let query2 = yield SCHaccesorio_1.SAccesorio.find({ _codArma: cod });
+                let query = yield SCHarmamento_1.SArma.find({ _codArma: cod });
+                //creo el objeto ARMA
+                for (dArma of query) {
+                    armaMontada = new arma_1.Arma(dArma._codArma, dArma._nombreArma, dArma._fechaProduccion, dArma._precioBase, dArma._disparoAutomatico, dArma._categoriaArma, dArma._animaRayada, dArma._calibre);
+                }
+                //calculo el valor del arma 
+                let precioArma = armaMontada.valorF();
+                // creo el objeto accesorio (cualquiera de los que exiten)
+                let arrayA = [];
+                for (dAccesorio of query2) {
+                    if (query2._tipoAccesorio == "Cargador") {
+                        tmpAccesorio = new cargador_1.Cargador(dAccesorio._codArma, dAccesorio._idAccesorio, dAccesorio._nombre, dAccesorio._tipoAccesorio, dAccesorio._precio, dAccesorio._numeroBalas);
+                    }
+                    else if (query2._tipoAccesorio == "Cañon") {
+                        tmpAccesorio = new ca_on_1.Cañon(dAccesorio._codArma, dAccesorio._idAccesorio, dAccesorio._nombre, dAccesorio._tipoAccesorio, dAccesorio._precio, dAccesorio._longitudCanon);
+                    }
+                    else {
+                        tmpAccesorio = new mirilla_1.Mirilla(dAccesorio._codArma, dAccesorio._idAccesorio, dAccesorio._nombre, dAccesorio._tipoAccesorio, dAccesorio._precio, dAccesorio._zoom, dAccesorio._tipoAccesorio);
+                    }
+                    arrayA.push(tmpAccesorio);
+                }
+                // monto los accesorios en el arma 
+                arrayA.forEach(element => {
+                    armaMontada.addAccesorio(element);
+                });
+                //recorro el array de accesorios del objeto armamontada y sumo todo sus precios
+                let precioAccesorios = 0;
+                for (let a of armaMontada.accesorio) {
+                    precioAccesorios += a.setPrecioF();
+                }
+                console.log("precio ac", precioAccesorios);
+                console.log(precioArma);
+                let valorTotalFinal = (precioAccesorios + precioArma);
+                console.log(valorTotalFinal);
+                res.json(valorTotalFinal);
             }))
                 .catch((mensaje) => {
                 res.send(mensaje);
@@ -525,7 +652,7 @@ class DatoRoutes {
         this._router.put('/modificoTirador/:cod', this.modificoTirador);
         this._router.delete('/borroTirador/:cod', this.borroTirador);
         // RUTAS BASICAS EQUIPO
-        this._router.get('/listaEquipos', this.listoEquipos);
+        this._router.get('/listaEquipos/:cod', this.listoEquipos);
         this._router.post('/nuevoEquipo', this.newEquipo);
         this._router.get('/obtengoEquipo/:cod', this.obtengoEquipo);
         this._router.put('/modificoEquipo/:cod', this.modificoEquipo);
@@ -534,10 +661,14 @@ class DatoRoutes {
         this._router.get('/listaAccesorios', this.listoAccesorios);
         this._router.post('/nuevoAccesorio', this.newAccesorio);
         this._router.get('/obtengoAccesorio/:cod', this.obtengoAccesorio);
+        this._router.get('/obtengoAccesorioCA/:cod', this.obtengoAccesorioCodArma);
         this._router.put('/modificoAccesorio/:cod', this.modificoAccesorio);
         this._router.delete('/borroAccesorio/:cod', this.borroAccesorio);
         //RUTA CALCULO
-        this._router.get('/monto/:cod', this.montoArma);
+        this._router.get('/valorArma/:cod', this.valorArma);
+        this._router.get('/KDA/:cod', this.KDATirador);
+        this._router.get('/armaMontada/:cod', this.ArmayAcesorio);
+        this._router.get('/KDAequipo/:cod', this.KDAEQUIPO);
     }
 }
 const obj = new DatoRoutes();

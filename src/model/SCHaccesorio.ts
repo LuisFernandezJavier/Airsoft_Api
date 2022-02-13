@@ -38,4 +38,16 @@ export type iAccesorio = {
     _precio: number ,
 }
 
+export type xAccesorio = {
+    _codArma: string ,
+    _idAccesorio: string ,
+    _nombre: string ,
+    _tipoAccesorio: string ,
+    _precio: number ,
+    _numeroBalas: number ,
+    _zoom: number ,
+    _tipoMirilla: string,
+    _longitudCanon: number
+}
+
 export const SAccesorio = model('accesorios', accesorioSchema) 

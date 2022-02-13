@@ -20,5 +20,8 @@ class Equipo {
     get miembros() {
         return this._miembros;
     }
+    addTirador(tirador) {
+        this._miembros.push(tirador);
+    }
 }
 exports.Equipo = Equipo;

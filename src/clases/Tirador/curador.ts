@@ -17,4 +17,12 @@ export class Curador extends Tirador {
     get revivido() {
         return this._revivido
     }
+
+
+    public KDA() {
+        let media: number;
+        media = super.KDA()
+        media = media + (this._revivido/this._muertes)
+        return media
+    }
 }

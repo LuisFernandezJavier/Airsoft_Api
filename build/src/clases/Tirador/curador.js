@@ -10,5 +10,11 @@ class Curador extends tirador_1.Tirador {
     get revivido() {
         return this._revivido;
     }
+    KDA() {
+        let media;
+        media = super.KDA();
+        media = media + (this._revivido / this._muertes);
+        return media;
+    }
 }
 exports.Curador = Curador;

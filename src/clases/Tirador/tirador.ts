@@ -46,5 +46,12 @@ export class Tirador {
         return this._fechaInscripcion;
     }
 
+
+    public KDA (){
+        let media: number;
+        media = (this._bajas / this._muertes)
+        return media
+    }
+
     
 }
