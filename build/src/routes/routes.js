@@ -24,6 +24,7 @@ const bombardero_1 = require("../clases/Tirador/bombardero");
 const cargador_1 = require("../clases/Accesorio/cargador");
 const ca_on_1 = require("../clases/Accesorio/ca\u00F1on");
 const mirilla_1 = require("../clases/Accesorio/mirilla");
+const SCHlogin_1 = require("../model/SCHlogin");
 class DatoRoutes {
     constructor() {
         // funciones basicas para las armas
@@ -115,6 +116,7 @@ class DatoRoutes {
                 .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
                 console.log(mensaje);
                 const query = yield SCHtirador_1.STirador.find({});
+                console.log(query);
                 res.json(query);
             }))
                 .catch((mensaje) => {
@@ -152,7 +154,7 @@ class DatoRoutes {
                     _explosivoDetonado: tirador._explosivoDetonado
                 });
             }
-            else {
+            else if (tirador._rolTirador == 'Tirador') {
                 console.log('solo disparo');
                 objTirador = new SCHtirador_1.STirador({
                     _codArma: tirador._codArma,
@@ -471,41 +473,7 @@ class DatoRoutes {
                 .catch((error) => res.send('Error:  ' + error));
             yield database_1.db.desconectarBD();
         });
-        // FUNCIONES CON CALCULOS
-        this.valorArma = (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const cod = req.params.cod;
-            yield database_1.db.conectarBD()
-                .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
-                console.log(mensaje);
-                let tmpAccesorio = new accesorio_1.Accesorio("", "", "", "", 0);
-                let armaMontada = new arma_1.Arma("", "", new Date, 0, false, "", false, 0);
-                let dArma;
-                let dAccesorio;
-                let query2 = yield SCHaccesorio_1.SAccesorio.find({ _codArma: cod });
-                let query = yield SCHarmamento_1.SArma.find({ _codArma: cod });
-                for (dArma of query) {
-                    armaMontada = new arma_1.Arma(dArma._codArma, dArma._nombreArma, dArma._fechaProduccion, dArma._precioBase, dArma._disparoAutomatico, dArma._categoriaArma, dArma._animaRayada, dArma._calibre);
-                }
-                let valorAr = armaMontada.valorF();
-                let valorAc = 0;
-                let valorAc2 = 0;
-                //let arrayA = []
-                for (dAccesorio of query2) {
-                    tmpAccesorio = new accesorio_1.Accesorio(dAccesorio._codArma, dAccesorio._idAccesorio, dAccesorio._nombre, dAccesorio._tipoAccesorio, dAccesorio._precio);
-                    valorAc = tmpAccesorio.setPrecioF();
-                    valorAc2 += valorAc;
-                }
-                //console.log(valorAr);
-                console.log(valorAc2);
-                let valorT = valorAc2 + valorAr;
-                console.log(valorAr);
-                res.json(valorT);
-            }))
-                .catch((mensaje) => {
-                res.send(mensaje);
-            });
-            yield database_1.db.desconectarBD();
-        });
+        //calculo el kda de 1 solo tirador
         this.KDATirador = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const cod = req.params.cod;
             yield database_1.db.conectarBD()
@@ -542,6 +510,7 @@ class DatoRoutes {
                 res.send(mensaje);
             });
         });
+        //envio al front ARRAY DE [NOMBRE TRIADOR , BAJAS , MUERTES , SU KDA]
         this.KDAEQUIPO = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const cod = req.params.cod;
             yield database_1.db.conectarBD()
@@ -582,6 +551,7 @@ class DatoRoutes {
                 res.send(mensaje);
             });
         });
+        // CALCULO EL VALOR TOTAL ACTUAL DEL ARMA CON SUS ACCESORIOS  EN CASO DE TENERLOS
         this.ArmayAcesorio = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const cod = req.params.cod;
             yield database_1.db.conectarBD()
@@ -633,6 +603,19 @@ class DatoRoutes {
             });
             yield database_1.db.desconectarBD();
         });
+        // ENVIO AL FRONT EL UNICO USUARIO Y PASS QUE EXISTEN PARA LOGEARSE     
+        this.testLogin = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const cod = req.params.cod;
+            yield database_1.db.conectarBD()
+                .then((mensaje) => __awaiter(this, void 0, void 0, function* () {
+                console.log(mensaje);
+                const query = yield SCHlogin_1.SLogin.findOne({ _codLogin: "1" });
+                res.json(query);
+            }))
+                .catch((mensaje) => {
+                res.send(mensaje);
+            });
+        });
         this._router = (0, express_1.Router)();
     }
     get router() {
@@ -665,10 +648,12 @@ class DatoRoutes {
         this._router.put('/modificoAccesorio/:cod', this.modificoAccesorio);
         this._router.delete('/borroAccesorio/:cod', this.borroAccesorio);
         //RUTA CALCULO
-        this._router.get('/valorArma/:cod', this.valorArma);
+        //this._router.get('/valorArma/:cod', this.valorArma)
         this._router.get('/KDA/:cod', this.KDATirador);
         this._router.get('/armaMontada/:cod', this.ArmayAcesorio);
         this._router.get('/KDAequipo/:cod', this.KDAEQUIPO);
+        //RUTA LOGIN
+        this.router.get('/login/:cod', this.testLogin);
     }
 }
 const obj = new DatoRoutes();

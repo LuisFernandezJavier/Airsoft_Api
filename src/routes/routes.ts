@@ -14,6 +14,7 @@ import { Cargador } from '../clases/Accesorio/cargador';
 import { Cañon } from '../clases/Accesorio/cañon';
 import { Mirilla } from '../clases/Accesorio/mirilla';
 import { Equipo } from '../clases/Equipo/equipo';
+import { SLogin } from '../model/SCHlogin';
 
 
 
@@ -138,6 +139,7 @@ class DatoRoutes {
             .then(async (mensaje) => {
                 console.log(mensaje)
                 const query = await STirador.find({})
+                console.log(query)
                 res.json(query)
             })
             .catch((mensaje) => {
@@ -177,7 +179,7 @@ class DatoRoutes {
                 _fechaInscripcion: tirador._fechaInscripcion,
                 _explosivoDetonado: tirador._explosivoDetonado
             });
-        } else {
+        } else if (tirador._rolTirador == 'Tirador') {
             console.log('solo disparo')
             objTirador = new STirador({
                 _codArma: tirador._codArma,
@@ -566,62 +568,8 @@ class DatoRoutes {
         await db.desconectarBD()
     }
 
-    // FUNCIONES CON CALCULOS
-    private valorArma = async (req: Request, res: Response) => {
-        const cod = req.params.cod
-        await db.conectarBD()
-            .then(async (mensaje) => {
-                console.log(mensaje)
-                let tmpAccesorio: Accesorio = new Accesorio("", "", "", "", 0);
-                let armaMontada: Arma = new Arma("", "", new Date, 0, false, "", false, 0,);
-                let dArma: iArma
-                let dAccesorio: iAccesorio
-
-                let query2: any = await SAccesorio.find({ _codArma: cod })
-                let query: any = await SArma.find({ _codArma: cod })
-                for (dArma of query) {
-                    armaMontada = new Arma(
-                        dArma._codArma,
-                        dArma._nombreArma,
-                        dArma._fechaProduccion,
-                        dArma._precioBase,
-                        dArma._disparoAutomatico,
-                        dArma._categoriaArma,
-                        dArma._animaRayada,
-                        dArma._calibre ,
-
-                    )
-                }
-                let valorAr = armaMontada.valorF()
-                let valorAc: number = 0
-                let valorAc2: number = 0
-
-                //let arrayA = []
-
-                for (dAccesorio of query2) {
-                    tmpAccesorio = new Accesorio(dAccesorio._codArma, dAccesorio._idAccesorio, dAccesorio._nombre, dAccesorio._tipoAccesorio, dAccesorio._precio);
-                    valorAc = tmpAccesorio.setPrecioF()
-                    valorAc2 += valorAc
-                }
-                //console.log(valorAr);
-                console.log(valorAc2)
-                let valorT = valorAc2 + valorAr
-
-               
-                console.log(valorAr)
-                res.json(valorT)
-
-
-
-
-
-            })
-            .catch((mensaje) => {
-                res.send(mensaje)
-            })
-        await db.desconectarBD()
-    }
-
+  
+//calculo el kda de 1 solo tirador
 
     private KDATirador = async (req: Request, res: Response) => {
         const cod = req.params.cod
@@ -692,6 +640,7 @@ class DatoRoutes {
             })
     }
 
+    //envio al front ARRAY DE [NOMBRE TRIADOR , BAJAS , MUERTES , SU KDA]
 
     private KDAEQUIPO = async (req: Request, res: Response) => {
         const cod = req.params.cod
@@ -778,7 +727,7 @@ class DatoRoutes {
 
 
 
-
+// CALCULO EL VALOR TOTAL ACTUAL DEL ARMA CON SUS ACCESORIOS  EN CASO DE TENERLOS
 
     private ArmayAcesorio = async (req: Request, res: Response) => {
         const cod = req.params.cod
@@ -871,7 +820,19 @@ class DatoRoutes {
         await db.desconectarBD()
     }
 
-
+// ENVIO AL FRONT EL UNICO USUARIO Y PASS QUE EXISTEN PARA LOGEARSE     
+    private testLogin = async (req: Request, res: Response) => {
+        const cod = req.params.cod
+        await db.conectarBD()
+            .then(async (mensaje) => {
+                console.log(mensaje)
+                const query = await SLogin.findOne({_codLogin:"1"})
+                res.json(query)
+            })
+            .catch((mensaje) => {
+                res.send(mensaje)
+            })
+    }
 
 
 
@@ -909,10 +870,13 @@ class DatoRoutes {
         this._router.delete('/borroAccesorio/:cod', this.borroAccesorio)
 
         //RUTA CALCULO
-        this._router.get('/valorArma/:cod', this.valorArma)
+        //this._router.get('/valorArma/:cod', this.valorArma)
         this._router.get('/KDA/:cod', this.KDATirador)
         this._router.get('/armaMontada/:cod', this.ArmayAcesorio)
         this._router.get('/KDAequipo/:cod', this.KDAEQUIPO)
+
+        //RUTA LOGIN
+        this.router.get('/login/:cod', this.testLogin)
     }
 
 }
